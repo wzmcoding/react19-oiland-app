@@ -1,14 +1,28 @@
 import React from "react";
 import User from "@/components/User";
 import { useLocation, Link } from "react-router";
-import imgLevel from "@/assets/menu/level.svg";
 import imgLogoText from "@/assets/logo-text.svg";
 
 const nav = [
     {
-        icon: imgLevel,
-        label: "闯关",
-        value: "/",
+        icon: '/menu/level.svg',
+        label: '首页',
+        value: '/',
+    },
+    {
+        icon: '/menu/classroom.png',
+        label: '小帕课堂',
+        value: '/classroom',
+    },
+    {
+        icon: '/menu/real.png',
+        label: '真题练习',
+        value: '/real-question',
+    },
+    {
+        icon: '/menu/coursework.png',
+        label: '课程作业',
+        value: '/course',
     },
 ];
 
@@ -28,11 +42,11 @@ const NavBar: React.FC = () => {
                         key={index}
                         to={item.value}
                         className={`my-3 flex cursor-pointer items-center gap-1 rounded-xl p-2 ${isActive(item.value)
-                                ? "text-primary border border-solid border-primary bg-primary/20"
-                                : ""
+                            ? "text-primary border border-solid border-primary bg-primary/20"
+                            : ""
                             }`}
                     >
-                        <img className="h-8 w-8" src={item.icon} alt={item.label} />
+                        <img className="h-6 w-6" src={item.icon} alt={item.label} />
                         <div className="text-xl">{item.label}</div>
                     </Link>
                 ))}
