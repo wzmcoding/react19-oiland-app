@@ -16,18 +16,25 @@ const User = () => {
         navigate('/login');
         reset();
     }
+
+    function handlePerson() {
+        navigate('/personal');
+    }
     return (
-        <div className="h-full w-full flex items-end mb-3">
+        <div className="h-full w-full flex items-end mb-7">
             <div className="flex justify-end pr-10 pt-2">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <div className='flex items-center gap-2 cursor-pointer'>
-                                <img className="h-15 w-15 border rounded-full" src={imgUser} />
-                                <div className='text-primary'>个人中心</div>
+                                <img className="h-10 w-10" src={imgUser} />
+                                <div className='text-primary text-xl font-500'>个人中心</div>
                         </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
+                    <DropdownMenuContent className="">
                         <DropdownMenuGroup>
+                            <DropdownMenuItem className='cursor-pointer hover:bg-primary/20! hover:text-primary!'>
+                                <div onClick={handlePerson}>个人资料</div>
+                            </DropdownMenuItem>
                             <DropdownMenuItem className='cursor-pointer hover:bg-primary/20! hover:text-primary!'>
                                 <div onClick={handleLogout}>退出登录</div>
                             </DropdownMenuItem>

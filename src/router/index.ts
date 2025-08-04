@@ -6,6 +6,7 @@ import HomeLayout from "@/layout/home-layout";
 import ClassRoom from "@/views/classroom/index.tsx";
 import RealQuestion from "@/views/real-question/index.tsx";
 import Course from "@/views/course/index.tsx";
+import Personal from "@/views/personal/index.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -16,6 +17,7 @@ export const router = createBrowserRouter([
             { path: "classroom", Component: ClassRoom },
             { path: "real-question", Component: RealQuestion },
             { path: "course", Component: Course },
+            { path: 'personal', Component: Personal }
         ],
     },
     { path: "login", Component: Login },
