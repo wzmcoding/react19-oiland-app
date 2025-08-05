@@ -1,9 +1,68 @@
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useUserStore } from "@/stores/user";
+import { useState } from "react";
+
+const formSchema = z.object({
+    username: z.string().nonempty({
+        message: "请填写您的真实姓名",
+    }),
+    nickname: z.string().nonempty({
+        message: "请填写您的昵称",
+    }),
+});
 
 export default function Personal() {
+    const { user } = useUserStore();
+    const [isEditField, setIsEditField] = useState<{ username: boolean; nickname: boolean }>({
+        username: !!user?.username || false,
+        nickname: !!user?.nickname || false,
+    })
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            username: user?.username || "",
+            nickname: user?.nickname || "",
+        },
+    });
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log("values -> ", values);
+    }
+
+    function handleEditField(field: 'username' | 'nickname') {
+        setIsEditField({
+            ...isEditField,
+            [field]: !isEditField[field],
+        })
+    }
+
+    function save(field: 'username' | 'nickname') {
+        setIsEditField({
+            ...isEditField,
+            [field]: true,
+        })
+    }
+
+    function cancel(field: 'username' | 'nickname') {
+        handleEditField(field)
+        form[field] = user?.[field] || ''
+    }
+
     return (
         <div className="w-full flex flex-col px-8 py-8">
             <div className="text-xl font-semibold">个人资料</div>
@@ -12,53 +71,74 @@ export default function Personal() {
             <Separator className="bg-foreground/10" />
 
             <div className="my-1.5 space-y-6">
-                {/* 姓名 */}
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium">姓名</Label>
-                    <div className="text-sm text-muted-foreground">
-                        请填写您的真实姓名
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <Input
-                            disabled
-                            placeholder="请填写您的真实姓名"
-                            className="h-10"
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>姓名</FormLabel>
+                                    <FormDescription>请填写您的真实姓名</FormDescription>
+                                    <FormControl>
+                                        <div className="flex items-center gap-3">
+                                            <Input placeholder="请填写您的真实姓名" {...field} disabled={isEditField.username} />
+                                            <div className="w-46 flex items-center gap-2">
+                                                {
+                                                    isEditField.username ? <Button className="h-10 w-16 rounded-lg" onClick={() => handleEditField('username')}>修改</Button>
+                                                        : <>
+                                                            <Button className="h-10 w-16 rounded-lg" onClick={() => save('username')}>保存</Button>
+                                                            <Button
+                                                                variant="secondary"
+                                                                className="h-10 w-16 rounded-lg bg-muted"
+                                                                onClick={() => cancel('username')}
+                                                            >
+                                                                取消
+                                                            </Button>
+                                                        </>
+                                                }
+                                            </div>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                        <div className="w-[180px] flex items-center gap-2">
-                            {/* 根据编辑状态切换显示 */}
-                            <Button className="h-10 w-16 rounded-lg">修改</Button>
-                            <Button className="h-10 w-16 rounded-lg">保存</Button>
-                            <Button
-                                variant="secondary"
-                                className="h-10 w-16 rounded-lg bg-muted"
-                            >
-                                取消
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                        <FormField
+                            control={form.control}
+                            name="nickname"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>昵称</FormLabel>
+                                    <FormDescription>请填写您的昵称</FormDescription>
+                                    <FormControl>
+                                        <div className="flex items-center gap-3">
+                                            <Input placeholder="请填写您的昵称" {...field} disabled={isEditField.nickname} />
+                                            <div className="w-46 flex items-center gap-2">
+                                                {
+                                                    isEditField.nickname ? <Button className="h-10 w-16 rounded-lg" onClick={() => handleEditField('nickname')}>修改</Button>
+                                                        : <>
+                                                            <Button className="h-10 w-16 rounded-lg" onClick={() => save('nickname')}>保存</Button>
+                                                            <Button
+                                                                variant="secondary"
+                                                                className="h-10 w-16 rounded-lg bg-muted"
+                                                                onClick={() => cancel('nickname')}
+                                                            >
+                                                                取消
+                                                            </Button>
+                                                        </>
+                                                }
 
-                {/* 昵称 */}
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium">昵称</Label>
-                    <div className="flex items-center gap-3">
-                        <Input
-                            disabled
-                            placeholder="请填写您的昵称"
-                            className="h-10"
+                                            </div>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                        <div className="w-[180px] flex items-center gap-2">
-                            <Button className="h-10 w-16 rounded-lg">修改</Button>
-                            <Button className="h-10 w-16 rounded-lg">保存</Button>
-                            <Button
-                                variant="secondary"
-                                className="h-10 w-16 rounded-lg bg-muted"
-                            >
-                                取消
-                            </Button>
-                        </div>
-                    </div>
-                </div>
+                        <Button type="submit">Submit</Button>
+                    </form>
+                </Form>
             </div>
 
             {/* 班级信息 */}
@@ -87,12 +167,12 @@ export default function Personal() {
                                 </div>
                                 <div>{item.joined === false ? "待审核" : ""}</div>
                             </div>
-                        )
+                        ),
                     )}
 
                     <Button className="mt-1 h-10 w-35 rounded-lg">加入班级</Button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
