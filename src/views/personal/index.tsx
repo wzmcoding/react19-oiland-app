@@ -60,7 +60,7 @@ export default function Personal() {
 
     function cancel(field: 'username' | 'nickname') {
         handleEditField(field)
-        form[field] = user?.[field] || ''
+        form.setValue(field, user?.[field] || '')
     }
 
     return (
@@ -136,7 +136,6 @@ export default function Personal() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Submit</Button>
                     </form>
                 </Form>
             </div>
