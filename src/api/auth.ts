@@ -1,3 +1,4 @@
+import type { GradeInfo, UserInfo } from "@/stores/user"
 import { api } from "./api"
 
 export const apiAuth = {
@@ -37,6 +38,41 @@ export const apiAuth = {
   }) => {
     return api.update({
       url: 'user/changePassword',
+      data,
+    })
+  },
+  /**
+   * 定时获取用户最后活跃时间
+   */
+  refresh: (): Promise<{ user: UserInfo }> => {
+    return api.action({
+      url: 'app/user/refresh',
+      method: 'post',
+      message: {
+        error: {
+          enable: false,
+        },
+      },
+    })
+  },
+  /**
+   * 加入班级
+   * @param data
+   */
+  joinGrade: (data: Pick<GradeInfo, 'gradeNumber'>): Promise<unknown> => {
+    return api.action({
+      url: 'app/user/join/grade',
+      method: 'post',
+      data,
+    })
+  },
+  /**
+   * 更新用户信息
+   * @param data
+   */
+  updateUser: (data: Partial<UserInfo>): Promise<UserInfo> => {
+    return api.update({
+      url: 'app/user/edit',
       data,
     })
   },

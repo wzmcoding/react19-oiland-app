@@ -9,12 +9,24 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useUserStore } from "@/stores/user";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { dialog } from "@/utils";
+import { service } from "@/api";
 
 const formSchema = z.object({
     username: z.string().nonempty({
@@ -24,13 +36,24 @@ const formSchema = z.object({
         message: "请填写您的昵称",
     }),
 });
+const classFormSchema = z.object({
+    number: z.string().nonempty({
+        message: "请输入班级码",
+    }),
+});
 
 export default function Personal() {
-    const { user } = useUserStore();
+    const [open, setOpen] = useState(false);
+    const { user, refresh, setUser } = useUserStore();
     const [isEditField, setIsEditField] = useState<{ username: boolean; nickname: boolean }>({
         username: !!user?.username || false,
         nickname: !!user?.nickname || false,
     })
+
+    useEffect(() => {
+        console.log("user -> ", user);
+        refresh(true)
+    }, [])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -39,9 +62,25 @@ export default function Personal() {
             nickname: user?.nickname || "",
         },
     });
+    const classForm = useForm<z.infer<typeof classFormSchema>>({
+        resolver: zodResolver(classFormSchema),
+        defaultValues: {
+            number: "",
+        },
+    });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("values -> ", values);
+    async function confirm() {
+        console.log("confirm -> ", classForm.getValues('number'));
+        try {
+            await service.auth.joinGrade({
+                gradeNumber: classForm.getValues('number')
+            })
+            await refresh(true)
+        } catch (error) {
+            console.error("加入班级失败", error);
+            dialog.toast("加入班级失败，请稍后再试~")
+        }
+        setOpen(false);
     }
 
     function handleEditField(field: 'username' | 'nickname') {
@@ -51,16 +90,30 @@ export default function Personal() {
         })
     }
 
-    function save(field: 'username' | 'nickname') {
+    async function save(field: 'username' | 'nickname') {
+        console.log("save -> ", field);
         setIsEditField({
             ...isEditField,
             [field]: true,
         })
+        
+        const data = { ...user, [field]: form.getValues(field) }
+        await service.auth.updateUser(data)
+        setUser(data)
     }
 
     function cancel(field: 'username' | 'nickname') {
         handleEditField(field)
         form.setValue(field, user?.[field] || '')
+    }
+
+    function handleAddClass() {
+        classForm.reset()
+        if (!form.getValues('username')) {
+            dialog.toast('请先填写姓名再加入班级~')
+            return
+        }
+        setOpen(true)
     }
 
     return (
@@ -72,7 +125,7 @@ export default function Personal() {
 
             <div className="my-1.5 space-y-6">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form className="space-y-8">
                         <FormField
                             control={form.control}
                             name="username"
@@ -86,7 +139,7 @@ export default function Personal() {
                                             <div className="w-46 flex items-center gap-2">
                                                 {
                                                     isEditField.username ? <Button className="h-10 w-16 rounded-lg" onClick={() => handleEditField('username')}>修改</Button>
-                                                        : <>
+                                                        : <div className="flex items-center gap-2">
                                                             <Button className="h-10 w-16 rounded-lg" onClick={() => save('username')}>保存</Button>
                                                             <Button
                                                                 variant="secondary"
@@ -95,7 +148,7 @@ export default function Personal() {
                                                             >
                                                                 取消
                                                             </Button>
-                                                        </>
+                                                        </div>
                                                 }
                                             </div>
                                         </div>
@@ -117,7 +170,7 @@ export default function Personal() {
                                             <div className="w-46 flex items-center gap-2">
                                                 {
                                                     isEditField.nickname ? <Button className="h-10 w-16 rounded-lg" onClick={() => handleEditField('nickname')}>修改</Button>
-                                                        : <>
+                                                        : <div className="flex items-center gap-2">
                                                             <Button className="h-10 w-16 rounded-lg" onClick={() => save('nickname')}>保存</Button>
                                                             <Button
                                                                 variant="secondary"
@@ -126,7 +179,7 @@ export default function Personal() {
                                                             >
                                                                 取消
                                                             </Button>
-                                                        </>
+                                                        </div>
                                                 }
 
                                             </div>
@@ -149,27 +202,68 @@ export default function Personal() {
                 </div>
 
                 <div className="mt-4 space-y-2">
-                    {/* 无班级时显示 */}
-                    <div>
-                        <span className="text-red-500">*</span>班级
-                    </div>
+                    {
+                        !user.gradeInfos?.length &&
+                        <div>
+                            <span className="text-red-500">*</span>班级
+                        </div>
+                    }
 
                     {/* 模拟班级列表 */}
-                    {[{ gradeId: 1, gradeName: "高三（1）班", joined: false }].map(
+                    {user.gradeInfos?.map(
                         (item) => (
                             <div
                                 key={item.gradeId}
                                 className="flex items-center justify-start gap-4"
                             >
-                                <div className="min-w-[70px] border border-foreground/10 px-3 py-2 text-sm rounded-none">
+                                <div className="min-w-70 border cursor-pointer border-foreground/10 p-2 text-sm rounded-none">
                                     {item.gradeName}
                                 </div>
                                 <div>{item.joined === false ? "待审核" : ""}</div>
                             </div>
                         ),
                     )}
-
-                    <Button className="mt-1 h-10 w-35 rounded-lg">加入班级</Button>
+                    <Button className="mt-1 h-10 w-35 rounded-lg" onClick={handleAddClass}>加入班级</Button>
+                    <Dialog open={open} onOpenChange={setOpen}>
+                        <Form {...classForm}>
+                            <form className="space-y-8">
+                                <DialogTrigger asChild>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>加入班级</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="grid gap-4">
+                                        <FormField
+                                            control={classForm.control}
+                                            name="number"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <div className="flex items-center gap-3">
+                                                        <FormLabel>班级码</FormLabel>
+                                                        <FormControl>
+                                                            <div className="flex items-center gap-3 flex-1">
+                                                                <Input placeholder="请输入班级码" {...field} />
+                                                            </div>
+                                                        </FormControl>
+                                                    </div>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    <DialogFooter className="sm:justify-end">
+                                        <DialogClose asChild>
+                                            <Button type="button" variant="secondary">
+                                                取消
+                                            </Button>
+                                        </DialogClose>
+                                        <Button type="submit" onClick={confirm}>确定</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </form>
+                        </Form>
+                    </Dialog>
                 </div>
             </div>
         </div>

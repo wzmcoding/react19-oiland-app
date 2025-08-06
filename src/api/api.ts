@@ -1,14 +1,17 @@
 import { env } from '@/utils/env'
 import API from '@/utils/request'
+import { ls } from '@/utils/storage'
 
 export const BASE_URL = env.isDev ? import.meta.env.VITE_API_URL_DEV : import.meta.env.VITE_API_URL_PROD
-
 export const api = new API({
   baseURL: BASE_URL,
   successCode: '00',
   appendData: (config: any) => {
     config.params._t = +new Date()
   },
+  headers: {
+    authorization: ls.get('token') || '',
+  }
 })
 
 interface AliResponseData {

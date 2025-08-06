@@ -6,6 +6,7 @@ const Home = () => {
     const { setToken, setUser, token, user } = useUserStore();
 
     function init() {
+        console.log('init------',{ token, user  })
         setToken(token);
         setUser(user);
     }
