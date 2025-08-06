@@ -93,10 +93,6 @@ const Login = () => {
         }
     }
 
-    function handleBackHome() {
-        navigate('/')
-    }
-
     return (
         <div className="w-[100vw] h-[100vh] flex justify-center items-center bg-primary/8">
             <div className="">
@@ -145,7 +141,7 @@ const Login = () => {
                                                             <FormControl>
                                                                 <Input className="h-11" placeholder="请输入验证码" {...field} />
                                                             </FormControl>
-                                                            <Button className="h-11" onClick={handleCaptcha} disabled={codeCd}>验证码{codeCd && <span>({long})</span>}</Button>
+                                                            <Button className="h-11" onClick={handleCaptcha} disabled={codeCd}>获取验证码{codeCd && <span>({long})</span>}</Button>
                                                         </div>
                                                         <FormMessage />
                                                     </FormItem>
@@ -153,8 +149,10 @@ const Login = () => {
                                             />
                                         </div>
                                     </div>
-                                    <Button type="submit" variant="default" className="bg-primary w-full py-4.6 text-xl rounded-full mb-4!">登录</Button>
-                                    <Button type="button" variant="outline" className="w-full py-4.5 text-xl rounded-full" onClick={handleBackHome}>返回首页</Button>
+                                    <div className="text-xs text-gray-500 mb-4">
+                                        未注册号码，登录成功后自动注册
+                                    </div>
+                                    <Button type="submit" variant="default" className="bg-primary mt-5 w-full py-5 rounded-full">登录</Button>
                                 </form>
                             </Form>
                         </div>

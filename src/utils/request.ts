@@ -197,7 +197,8 @@ class API {
           if (e.response?.data?.status === '02') {
             debouncedShowError(config, e)
             if (config.logoutHandler) {
-              config.logoutHandler(e).then(() => {
+              console.log('config.logoutHandler', config.logoutHandler)
+              config.logoutHandler(e)().then(() => {
                 reject(e)
               })
             }
