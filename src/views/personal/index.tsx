@@ -96,8 +96,12 @@ export default function Personal() {
             ...isEditField,
             [field]: true,
         })
-        
+        const value = form.getValues(field)
+        console.log("🚨 当前表单字段值：", field, value)
+
         const data = { ...user, [field]: form.getValues(field) }
+        console.log("save data -> ", data);
+        // 下面的代码执行会报错，页面直接不显示了 why?
         await service.auth.updateUser(data)
         setUser(data)
     }
@@ -210,7 +214,7 @@ export default function Personal() {
                     }
 
                     {/* 模拟班级列表 */}
-                    {user.gradeInfos?.map(
+                    {Array.isArray(user.gradeInfos) && user.gradeInfos?.map(
                         (item) => (
                             <div
                                 key={item.gradeId}

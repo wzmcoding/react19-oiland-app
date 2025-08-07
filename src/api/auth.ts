@@ -70,7 +70,7 @@ export const apiAuth = {
    * 更新用户信息
    * @param data
    */
-  updateUser: (data: Partial<UserInfo>): Promise<UserInfo> => {
+  updateUser: (data: Partial<UserInfo>): Promise<unknown> => {
     return api.update({
       url: 'app/user/edit',
       data,
