@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useUserStore } from "@/stores/user";
 import { useEffect, useState } from "react";
@@ -51,7 +51,6 @@ export default function Personal() {
     })
 
     useEffect(() => {
-        console.log("user -> ", user);
         refresh(true)
     }, [])
 
@@ -70,14 +69,12 @@ export default function Personal() {
     });
 
     async function confirm() {
-        console.log("confirm -> ", classForm.getValues('number'));
         try {
             await service.auth.joinGrade({
                 gradeNumber: classForm.getValues('number')
             })
             await refresh(true)
         } catch (error) {
-            console.error("加入班级失败", error);
             dialog.toast("加入班级失败，请稍后再试~")
         }
         setOpen(false);
@@ -91,17 +88,12 @@ export default function Personal() {
     }
 
     async function save(field: 'username' | 'nickname') {
-        console.log("save -> ", field);
         setIsEditField({
             ...isEditField,
             [field]: true,
         })
-        const value = form.getValues(field)
-        console.log("🚨 当前表单字段值：", field, value)
-
         const data = { ...user, [field]: form.getValues(field) }
-        console.log("save data -> ", data);
-        // 下面的代码执行会报错，页面直接不显示了 why?
+        // 下面的代码执行会报错，页面直接不显示了 why? 已解决， toast组件问题
         await service.auth.updateUser(data)
         setUser(data)
     }
