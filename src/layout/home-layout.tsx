@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { useUserStore } from "@/stores/user";
+import { Toaster } from "@/components/ui/sonner"
 export default function HomeLayout() {
     const { pathname } = useLocation();
     const { token } = useUserStore();
@@ -19,6 +20,7 @@ export default function HomeLayout() {
             <div className="h-screen flex-1">
                 <Outlet />
             </div>
+            <Toaster />
         </div>
     );
 }

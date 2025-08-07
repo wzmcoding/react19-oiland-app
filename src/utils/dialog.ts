@@ -54,7 +54,7 @@ function DialogToast(config: any | string) {
   else {
     config = merge({}, TOAST_DEFAULTS, config)
   }
-  return toast(config)
+  return toast(config.message)
 }
 
 const NOTIFICATION_DEFAULTS: any = {
